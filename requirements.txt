@@ -1,0 +1,5 @@
+cloudscraper
+colorama
+ntplib
+tqdm
+pip-system-certs
