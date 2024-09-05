@@ -5,7 +5,7 @@ firefox bookmark json file.
 # Configuration
 MAX_RETRIES = 3
 TIMEOUT = 5
-MAX_WORKERS = 10
+MAX_WORKERS = 20
 NTP_SERVER = 'pool.ntp.org'
 NTP_VERSION = 3
 TIME_SYNC_THRESHOLD = 10
@@ -112,8 +112,8 @@ def analyze_bookmarks(website_list):
     time.sleep(2)
 
 def test_url(url):
+    scraper = cloudscraper.create_scraper()
     for _ in range(MAX_RETRIES):
-        scraper = cloudscraper.create_scraper()
         time.sleep(1)
         try:
             for method in ['get', 'head']:
@@ -146,7 +146,7 @@ def process_websites(website_list):
 
         output = []
         output.append(f"{Fore.CYAN}Valid websites:{Style.RESET_ALL}")
-        valid_websites_display = valid_websites[-half_height+4:]  # Reserve one more line for the header
+        valid_websites_display = valid_websites[-half_height+6:]  # Reserve one more line for the header
         output.extend([f"{Fore.GREEN}{url[:terminal_width-1]}{Style.RESET_ALL}" for url in valid_websites_display])
         output.append(f"{Fore.CYAN}{'-' * terminal_width}{Style.RESET_ALL}")
         output.append(f"{Fore.CYAN}Invalid websites (grouped by error):{Style.RESET_ALL}")
@@ -157,6 +157,7 @@ def process_websites(website_list):
             output.extend([f"  {Fore.YELLOW}{url[:terminal_width-3]}{Style.RESET_ALL}" for url in urls[-2:]])
             if len(urls) > 2:
                 output.append(f"  {Fore.MAGENTA}... and {len(urls) - 2} more{Style.RESET_ALL}")
+                remaining_lines -= 1
             output.append("")
             remaining_lines -= 3
 
@@ -180,7 +181,7 @@ def process_websites(website_list):
         else:
             return error
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_url = {executor.submit(test_url, url): url for url in website_list}
         try:
             for future in tqdm.tqdm(concurrent.futures.as_completed(future_to_url), total=len(website_list), desc="Testing websites", ncols=terminal_width):
@@ -229,6 +230,7 @@ def main(jsonfile):
     website_list = search_uri(data)
     analyze_bookmarks(website_list)  # Analyze bookmarks before testing
     try:
+        start_time = time.time()
         valid_websites, invalid_websites, error_groups = process_websites(website_list)
 
         print(f"\n\n{Fore.CYAN}Summary:{Style.RESET_ALL}")
@@ -259,12 +261,17 @@ def main(jsonfile):
         with open(RESULTS_FILENAME, "w") as f:
             json.dump(results, f, indent=2)
         
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        
         print()
         print(f"{Fore.GREEN}┌───────────────────────────────────────────────────────────────┐{Style.RESET_ALL}")
         print(f"{Fore.GREEN}│                       Process Complete                        │{Style.RESET_ALL}")
         print(f"{Fore.GREEN}├───────────────────────────────────────────────────────────────┤{Style.RESET_ALL}")
         print(f"{Fore.GREEN}│ Detailed results have been saved to:                          │{Style.RESET_ALL}")
         print(f"{Fore.GREEN}│ {RESULTS_FILENAME:<61} │{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}├───────────────────────────────────────────────────────────────┤{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}│ Time elapsed: {elapsed_time:.2f} seconds                              │{Style.RESET_ALL}")
         print(f"{Fore.GREEN}└───────────────────────────────────────────────────────────────┘{Style.RESET_ALL}")
         print()
 
