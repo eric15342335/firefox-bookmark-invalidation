@@ -36,6 +36,10 @@ Then, run the script:
 python main.py /path/to/bookmarks.json
 ```
 
+## Video in action
+
+https://github.com/user-attachments/assets/21eb7172-3937-4c64-a0c6-882274b75490
+
 ## Thanks
 
 Special thanks to `Claude 3.5 Sonnet` for the code assistance.
