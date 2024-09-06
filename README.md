@@ -33,7 +33,7 @@ pip3 install -r requirements.txt
 Then, run the script:
 
 ```bash
-python3 main.py /path/to/bookmarks.json
+python main.py /path/to/bookmarks.json
 ```
 
 ## Thanks

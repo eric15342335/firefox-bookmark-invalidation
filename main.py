@@ -271,7 +271,7 @@ def main(jsonfile):
         print(f"{Fore.GREEN}│ Detailed results have been saved to:                          │{Style.RESET_ALL}")
         print(f"{Fore.GREEN}│ {RESULTS_FILENAME:<61} │{Style.RESET_ALL}")
         print(f"{Fore.GREEN}├───────────────────────────────────────────────────────────────┤{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}│ Time elapsed: {elapsed_time:.2f} seconds                              │{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}│ Time elapsed: {elapsed_time:.2f} seconds".ljust(61) + "│{Style.RESET_ALL}")
         print(f"{Fore.GREEN}└───────────────────────────────────────────────────────────────┘{Style.RESET_ALL}")
         print()
 
